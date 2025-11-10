@@ -20,8 +20,15 @@ pub fn query_devices(vec: &mut Vec<Device>) -> anyhow::Result<()> {
         .output()
         .context("Failed to execute headsetcontrol.exe")?;
 
-    let response: Output =
-        serde_json::from_slice(&res.stdout).context("Invalid JSON from headsetcontrol")?;
+    let response: Output = match serde_json::from_slice(&res.stdout) {
+        Ok(json) => json,
+        Err(e) => {
+            log::debug!("./headsetcontrol.exe --battery --output json:\n{}", String::from_utf8_lossy(&res.stdout));
+            return Err(anyhow::anyhow!(
+                "Failed to parse JSON from headsetcontrol.exe: {}",
+                e
+            ));
+    }};
 
     vec.clear();
     for device in response.devices {
