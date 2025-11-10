@@ -10,6 +10,7 @@ Adds a small icon to the "system tray" area of the Windows task bar, which displ
 * Built using Rust, with very low resource usage (<1MB RAM)
 * Supports most non-bluetooth headsets (SteelSeries, Logitech, Corsair, HyperX)
   * See all [supported headsets here](https://github.com/Sapd/HeadsetControl?tab=readme-ov-file#supported-headsets).
+    * Some headsets (notably Arctis Wireless 1) are may not work even though they are listed as supported.
 * Shows a little green dot to indicate charging
 
   ![Charging icon](docs/icon-charging.png)
@@ -22,17 +23,11 @@ Headset Battery Indicator depends on [Sapd/HeadsetControl](https://github.com/Sa
 
 > Running the installer may result in a Windows defender SmartScreen warning. This happens to all executables that don't have a large enough install count. There's no way around it other than paying hundreds of dollars every year for a signed certificate from Microsoft :(
 
-## Safety
+## Security
 
 The code that is in this repository is the code that is in the executable. There is a [Github Action](https://github.com/aarol/headset-battery-indicator/actions) that builds the code from source and creates the release in the [releases page](https://github.com/aarol/headset-battery-indicator/releases).
 
-There is no user-friendly way to verify that the .exe file is unmodified by me or anyone else, but if you have a Github account and the [Github Cli](https://cli.github.com/) installed, you can run
-
-```sh
-gh attestation verify '.\HeadsetBatteryIndicatorSetup.exe' --owner aarol
-```
-
-Which verifies that the file is unmodified from the one built by the Github Action.
+The GitHub release is marked as immutable, so once the executable is built by the Actions workflow, it cannot be modified by me or anyone else. This ways, you can be sure that the code you're running is the same code that is in this repository.
 
 ## Troubleshooting
 
@@ -50,11 +45,17 @@ Your headset might be unsupported due to being a new model. See [Adding a new he
 
 Rust and Cargo need to be installed.
 
-* Running the application: `cargo run --release`
+First, download or compile the HeadsetControl executable [from here](https://github.com/sapd/HeadsetControl/).
 
-* Installing the application locally: `cargo install`
+Then, clone this repository and copy the `headsetcontrol.exe` file into the project root folder (where `README.md` is).
 
-* Debugging the application: press `F5` in VS Code with the Rust Analyzer extension and CodeLLDB installed.
+Finally, from the `headset-battery-indicator` folder, you can:
+
+* Run the application: `cargo run --release`
+
+* Install the application locally: `cargo install`
+
+* Debug the application by pressing `F5` in VS Code with the Rust Analyzer and CodeLLDB extensions installed.
 
 ### Translations
 
