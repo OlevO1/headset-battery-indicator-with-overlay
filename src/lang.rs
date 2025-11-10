@@ -3,6 +3,7 @@ use log::info;
 enum Lang {
     En,
     Fi,
+    De,
 }
 
 #[allow(non_camel_case_types)]
@@ -25,6 +26,7 @@ static LANG: LazyLock<Lang> = LazyLock::new(|| {
     info!("Using locale {locale}");
     match locale.as_str() {
         "fi" | "fi-FI" => Lang::Fi,
+        "de" | "de-DE" | "de-AT" | "de-CH" => Lang::De,
         _ => Lang::En,
     }
 });
@@ -45,7 +47,6 @@ pub fn t(key: Key) -> &'static str {
         },
         Lang::Fi => match key {
             battery_remaining => "jäljellä",
-            
             no_adapter_found => "Kuulokeadapteria ei löytynyt",
             view_logs => "Näytä lokitiedostot",
             view_updates => "Näytä päivitykset",
@@ -54,6 +55,17 @@ pub fn t(key: Key) -> &'static str {
             device_disconnected => "(Ei yhteyttä)",
             battery_unavailable => "(Akku ei saatavilla)",
             version => "Versio",
+        },
+        Lang::De => match key {
+            battery_remaining => "verbleibend",
+            no_adapter_found => "Kein Kopfhöreradapter gefunden",
+            view_logs => "Protokolle anzeigen",
+            view_updates => "Updates anzeigen",
+            quit_program => "Beenden",
+            device_charging => "(Wird geladen)",
+            device_disconnected => "(Getrennt)",
+            battery_unavailable => "(Akkustand nicht verfügbar)",
+            version => "Version",
         },
     }
 }
