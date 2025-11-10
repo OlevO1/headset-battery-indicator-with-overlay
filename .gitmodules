@@ -1,4 +1,0 @@
-[submodule "tray-icon"]
-	path = tray-icon
-	url = https://github.com/aarol/tray-icon
-	branch = fix-error-cause

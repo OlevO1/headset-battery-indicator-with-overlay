@@ -25,7 +25,7 @@ serde_json = "1.0.145"
 simplelog = { version = "0.12.2", features = ["paris"] }
 sys-locale = "0.3.2"
 toml = "0.9.5"
-tray-icon = { path = "./tray-icon"}
+tray-icon = "0.21.2"
 winit = "0.30.12"
 
 [build-dependencies]
