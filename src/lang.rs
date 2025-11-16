@@ -4,6 +4,7 @@ enum Lang {
     En,
     Fi,
     De,
+    It,
 }
 
 #[allow(non_camel_case_types)]
@@ -27,6 +28,7 @@ static LANG: LazyLock<Lang> = LazyLock::new(|| {
     match locale.as_str() {
         "fi" | "fi-FI" => Lang::Fi,
         "de" | "de-DE" | "de-AT" | "de-CH" => Lang::De,
+        "it" | "it-IT" | "it-CH" => Lang::It,
         _ => Lang::En,
     }
 });
@@ -66,6 +68,17 @@ pub fn t(key: Key) -> &'static str {
             device_disconnected => "(Getrennt)",
             battery_unavailable => "(Akkustand nicht verfügbar)",
             version => "Version",
+        },
+        Lang::It => match key {
+            battery_remaining => "rimanente",
+            no_adapter_found => "Nessun adattatore per cuffie trovato",
+            view_logs => "Visualizza file di log",
+            view_updates => "Controlla aggiornamenti",
+            quit_program => "Chiudi",
+            device_charging => "(In carica)",
+            device_disconnected => "(Disconnesso)",
+            battery_unavailable => "(Batteria non disponibile)",
+            version => "Versione",
         },
     }
 }
