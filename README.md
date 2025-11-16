@@ -59,6 +59,12 @@ Finally, from the `headset-battery-indicator` folder, you can:
 
 ### Translations
 
+There are translations for the following languages:
+- English
+- Finnish
+- Italian
+- German
+
 Translations can be added to the [lang.rs](./src/lang.rs) file.
 
 ## Adding a new headset
