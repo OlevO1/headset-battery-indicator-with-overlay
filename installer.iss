@@ -8,7 +8,7 @@
 AppId=88ECD258-57B9-4DDB-ABA3-67DC0289A92C
 AppName={#MyAppDisplayName}
 ; keep this up to date
-AppVersion=3.0.0
+AppVersion=3.2.0
 WizardStyle=modern
 DefaultDirName={localappdata}\Programs\HeadsetBatteryIndicator
 DefaultGroupName={#MyAppDisplayName}
@@ -71,9 +71,9 @@ begin
 end;
 
 // Runs after the user has pressed "install"
-// Why is it necessary to kill the previous process with taskkill instead of relying on 
+// Why is it necessary to kill the previous process with taskkill instead of relying on
 // the Windows restart manager that Inno Setup normally uses?
-// 
+//
 // The tray-icon crate creates a new window via the win32 api, but actually doesn't
 // provide a way to react to the events sent by restart manager (WM_QUERYSESSIONEND, WM_CLOSE)
 // this means that there's currently no way to gracefully close the program, so we have to manually kill it.
