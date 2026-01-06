@@ -13,13 +13,14 @@ pub struct ContextMenu {
     device_menu_items: Vec<(headset_control::Device, CheckMenuItem)>,
     pub selected_device_idx: usize,
     separators: Option<(PredefinedMenuItem, PredefinedMenuItem)>, // (top, bottom)
+    pub menu_notifications: CheckMenuItem,
     menu_logs: MenuItem,
     menu_github: MenuItem,
     menu_close: MenuItem,
 }
 
 impl ContextMenu {
-    pub fn new() -> anyhow::Result<Self> {
+    pub fn new(notifications_enabled: bool) -> anyhow::Result<Self> {
         let menu = Menu::new();
 
         menu.append(&MenuItem::new(
@@ -30,11 +31,15 @@ impl ContextMenu {
 
         let device_menu_items = Vec::new();
 
+        let menu_notifications =
+            CheckMenuItem::new("Enable Notifications", true, notifications_enabled, None);
+
         let menu_logs = MenuItem::new(lang::t(view_logs), true, None);
         let menu_github = MenuItem::new(lang::t(view_updates), true, None);
         let menu_close = MenuItem::new(lang::t(quit_program), true, None);
         let separators = None;
 
+        menu.append(&menu_notifications)?;
         menu.append_items(&[&menu_logs, &menu_github])?;
         menu.append(&PredefinedMenuItem::separator())?;
         menu.append(&menu_close)?;
@@ -44,6 +49,7 @@ impl ContextMenu {
             device_menu_items,
             selected_device_idx: 0,
             separators,
+            menu_notifications,
             menu_logs,
             menu_github,
             menu_close,
