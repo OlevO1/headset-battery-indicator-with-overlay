@@ -16,6 +16,8 @@ pub enum Key {
     device_charging,
     device_disconnected,
     battery_unavailable,
+    show_notifications,
+    notifications_enabled_message,
     version,
 }
 
@@ -46,6 +48,8 @@ pub fn t(key: Key) -> &'static str {
             device_charging => "(Charging)",
             device_disconnected => "(Disconnected)",
             battery_unavailable => "(Battery unavailable)",
+            show_notifications => "Show notifications",
+            notifications_enabled_message => "Notifications enabled",
             version => "Version",
         },
         Lang::Fi => match key {
@@ -57,6 +61,8 @@ pub fn t(key: Key) -> &'static str {
             device_charging => "(Latautuu)",
             device_disconnected => "(Ei yhteyttä)",
             battery_unavailable => "(Akku ei saatavilla)",
+            show_notifications => "Näytä ilmoitukset",
+            notifications_enabled_message => "Ilmoitukset käytössä",
             version => "Versio",
         },
         Lang::De => match key {
@@ -68,6 +74,8 @@ pub fn t(key: Key) -> &'static str {
             device_charging => "(Wird geladen)",
             device_disconnected => "(Getrennt)",
             battery_unavailable => "(Akkustand nicht verfügbar)",
+            show_notifications => "Benachrichtigungen aktivieren",
+            notifications_enabled_message => "Benachrichtigungen aktiviert",
             version => "Version",
         },
         Lang::It => match key {
@@ -79,6 +87,8 @@ pub fn t(key: Key) -> &'static str {
             device_charging => "(In carica)",
             device_disconnected => "(Disconnesso)",
             battery_unavailable => "(Batteria non disponibile)",
+            show_notifications => "Mostra notifiche",
+            notifications_enabled_message => "Notifiche attivate",
             version => "Versione",
         },
     }

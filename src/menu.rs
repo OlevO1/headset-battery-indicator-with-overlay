@@ -33,7 +33,7 @@ impl ContextMenu {
         let device_menu_items = Vec::new();
 
         let menu_notifications =
-            CheckMenuItem::new("Enable Notifications", true, notifications_enabled, None);
+            CheckMenuItem::new(lang::t(show_notifications), true, notifications_enabled, None);
 
         let menu_logs = MenuItem::new(lang::t(view_logs), true, None);
         let menu_github = MenuItem::new(lang::t(view_updates), true, None);
@@ -43,6 +43,7 @@ impl ContextMenu {
 
         #[cfg(debug_assertions)]
         menu.append(&menu_trigger_notification)?;
+
         menu.append(&menu_notifications)?;
         menu.append_items(&[&menu_logs, &menu_github])?;
         menu.append(&PredefinedMenuItem::separator())?;

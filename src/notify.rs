@@ -53,7 +53,7 @@ impl Notifier {
             }
 
             if let Some(body) = msg
-                && let Err(err) = self.show_notification(current_level, product_name, body)
+                && let Err(err) = self.show_notification(product_name, &body)
             {
                 log::error!("Failed to show notification: {:?}", err);
             }
@@ -62,30 +62,16 @@ impl Notifier {
         self.last_notification_state = Some((current_level, current_status));
     }
 
-    fn show_notification(
-        &mut self,
-        current_level: isize,
-        product_name: &str,
-        body: String,
-    ) -> Result<()> {
+    pub fn show_notification(&mut self, product_name: &str, body: &str) -> Result<()> {
         let builder = NotificationBuilder::new()
             .visual(Text::create(0, product_name).with_style(HintStyle::Title))
             .visual(Text::create(1, &body).with_style(HintStyle::Body));
 
         builder
-            .build(
-                current_level as u32,
-                &self.toast_notifier,
-                &format!("battery_{}", current_level),
-                "battery",
-            )
+            .build(0, &self.toast_notifier, product_name, "battery")
             .context("building notification")?
             .show()
             .context("showing notification")
-    }
-
-    pub fn send_test_notification(&mut self) -> Result<()> {
-        self.show_notification(50, "Test Device", "Battery critical (50%)".to_string())
     }
 }
 

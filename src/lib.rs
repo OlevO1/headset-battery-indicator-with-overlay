@@ -20,30 +20,6 @@ use winit::{
 };
 
 use crate::{headset_control::BatteryState, notify::Notifier};
-
-fn battery_res_id_for(theme: Theme, battery_percent: isize, state: BatteryState) -> u16 {
-    let level = match battery_percent {
-        -1 => 1,
-        0..=12 => 1,  // 0%
-        13..=37 => 2, // 25%
-        38..=62 => 3, // 50%
-        63..=87 => 4, // 75%
-        _ => 5,       // 100%
-    };
-
-    // light mode icons are (10,20,...,50)
-    // dark mode icons are (15,25,...,55)
-    let theme_offset: u16 = if theme == Theme::Light { 5 } else { 0 };
-    // Charging icons are at icon id + 1
-    let charging_offset = (state == BatteryState::BatteryCharging) as u16;
-
-    if state == BatteryState::BatteryUnavailable {
-        10 + theme_offset
-    } else {
-        level * 10 + theme_offset + charging_offset
-    }
-}
-
 struct AppState {
     tray_icon: TrayIcon,
     devices: Vec<headset_control::Device>,
@@ -216,13 +192,23 @@ impl ApplicationHandler<()> for AppState {
                     if let Err(e) = self.settings.save() {
                         error!("Failed to save settings: {e:?}");
                     }
+
+                    if self.settings.notifications_enabled {
+                        let msg = lang::t(notifications_enabled_message);
+                        if let Err(err) = self
+                            .notifier
+                            .show_notification("Headset Battery Indicator", msg)
+                        {
+                            error!("Failed to show notification: {:?}", err);
+                        }
+                    }
                 }
 
                 id if id == self.context_menu.menu_trigger_notification.id() => {
                     #[cfg(debug_assertions)]
                     {
                         self.notifier
-                            .send_test_notification()
+                            .show_notification("Test Device", "Battery critical (50%)")
                             .expect("Sending test notification");
                     }
                 }
@@ -284,6 +270,29 @@ fn enable_dark_mode_support() -> Result<()> {
         set_preferred_app_mode(PreferredAppMode::AllowDark);
 
         Ok(())
+    }
+}
+
+fn battery_res_id_for(theme: Theme, battery_percent: isize, state: BatteryState) -> u16 {
+    let level = match battery_percent {
+        -1 => 1,
+        0..=12 => 1,  // 0%
+        13..=37 => 2, // 25%
+        38..=62 => 3, // 50%
+        63..=87 => 4, // 75%
+        _ => 5,       // 100%
+    };
+
+    // light mode icons are (10,20,...,50)
+    // dark mode icons are (15,25,...,55)
+    let theme_offset: u16 = if theme == Theme::Light { 5 } else { 0 };
+    // Charging icons are at icon id + 1
+    let charging_offset = (state == BatteryState::BatteryCharging) as u16;
+
+    if state == BatteryState::BatteryUnavailable {
+        10 + theme_offset
+    } else {
+        level * 10 + theme_offset + charging_offset
     }
 }
 
