@@ -10,14 +10,6 @@ use std::time::{Duration, Instant};
 use anyhow::Context;
 use log::{error, info};
 use tray_icon::{TrayIcon, TrayIconBuilder, menu::MenuEvent};
-use win32_notif::{
-    NotificationBuilder,
-    notification::visual::{
-        Text,
-        image::{Image, ImageCrop, Placement},
-        text::HintStyle,
-    },
-};
 use winit::{
     application::ApplicationHandler,
     event::{StartCause, WindowEvent},
@@ -55,7 +47,6 @@ struct AppState {
     devices: Vec<headset_control::Device>,
     context_menu: menu::ContextMenu,
     settings: settings::Settings,
-    last_notification_state: Option<(isize, BatteryState)>,
     notifier: Notifier,
 
     last_update: Instant,
@@ -80,7 +71,7 @@ pub fn run() -> anyhow::Result<()> {
 
 impl AppState {
     pub fn init() -> anyhow::Result<Self> {
-        let settings = settings::Settings::load();
+        let settings = settings::Settings::load().context("loading config from registry")?;
 
         let icon = Self::load_icon(Theme::Dark, 0, BatteryState::BatteryUnavailable)
             .context("loading fallback disconnected icon")?;
@@ -100,7 +91,6 @@ impl AppState {
             tray_icon,
             context_menu,
             settings,
-            last_notification_state: None,
             notifier,
 
             devices: vec![],
@@ -153,7 +143,7 @@ impl AppState {
         }
 
         self.notifier
-            .update_notifier(battery_level, battery_status, &product_name);
+            .update(battery_level, battery_status, &product_name);
 
         self.tray_icon
             .set_tooltip(Some(&tooltip_text))
@@ -219,7 +209,9 @@ impl ApplicationHandler<()> for AppState {
                     self.context_menu
                         .menu_notifications
                         .set_checked(self.settings.notifications_enabled);
-                    self.settings.save();
+                    if let Err(e) = self.settings.save() {
+                        error!("Failed to save settings: {e:?}");
+                    }
                 }
 
                 id if id == self.context_menu.menu_trigger_notification.id() => {

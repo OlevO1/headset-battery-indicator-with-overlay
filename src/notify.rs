@@ -3,14 +3,8 @@ use crate::headset_control::BatteryState;
 use win32_notif::{NotificationBuilder, ToastsNotifier, notification::visual::{Image, Placement, Text, image::ImageCrop, text::HintStyle}};
 #[cfg(windows)]
 use windows::{
-    Win32::Storage::EnhancedStorage::PKEY_AppUserModel_ID,
-    Win32::System::Com::{
-        CLSCTX_INPROC_SERVER, COINIT_APARTMENTTHREADED, CoCreateInstance, CoInitializeEx,
-        IPersistFile,
-    },
-    Win32::UI::Shell::PropertiesSystem::IPropertyStore,
-    Win32::UI::Shell::{IShellLinkW, SetCurrentProcessExplicitAppUserModelID, ShellLink},
-    core::{HSTRING, PCWSTR},
+    Win32::UI::Shell::SetCurrentProcessExplicitAppUserModelID,
+    core::HSTRING,
 };
 
 pub struct Notifier {
@@ -37,7 +31,7 @@ impl Notifier {
         })
     }
 
-    pub fn update_notifier(
+    pub fn update(
         &mut self,
         current_level: isize,
         current_status: BatteryState,
@@ -125,9 +119,6 @@ impl Notifier {
         self.show_notification(50, BatteryState::BatteryAvailable, "Test Device", "Battery critical (50%)".to_string());
     }
 }
-
-#[cfg(windows)]
-use windows::core::{Interface, PROPVARIANT};
 
 pub fn embedded_notif_png(
     battery_percent: isize,
@@ -289,9 +280,3 @@ fn path_to_file_uri(path: &std::path::Path) -> Option<String> {
     None
 }
 
-#[cfg(windows)]
-fn to_wide_null_terminated(s: &std::ffi::OsStr) -> Vec<u16> {
-    use std::os::windows::ffi::OsStrExt;
-
-    s.encode_wide().chain(std::iter::once(0)).collect()
-}

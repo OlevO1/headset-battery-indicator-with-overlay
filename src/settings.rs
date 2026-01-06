@@ -1,49 +1,44 @@
-use serde::{Deserialize, Serialize};
-use std::fs;
-use std::path::PathBuf;
+use anyhow::{Context, Result};
+use winreg::enums::HKEY_CURRENT_USER;
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Debug, Clone)]
 pub struct Settings {
     pub notifications_enabled: bool,
 }
 
-impl Default for Settings {
-    fn default() -> Self {
-        Self {
-            notifications_enabled: true,
-        }
-    }
-}
-
 impl Settings {
-    pub fn load() -> Self {
-        let config_path = Self::get_config_path();
-        if let Some(path) = &config_path {
-            if let Ok(contents) = fs::read_to_string(path) {
-                if let Ok(settings) = toml::from_str(&contents) {
-                    return settings;
-                }
-            }
-        }
-        Self::default()
-    }
+    pub fn load() -> Result<Self> {
+        let hkcu = winreg::RegKey::predef(HKEY_CURRENT_USER);
+        let (key, _) = hkcu
+            .create_subkey("Software\\HeadsetBatteryIndicator")
+            .context("accessing registry key")?;
 
-    pub fn save(&self) {
-        if let Some(path) = Self::get_config_path() {
-            if let Some(parent) = path.parent() {
-                let _ = fs::create_dir_all(parent);
-            }
-            if let Ok(toml) = toml::to_string(self) {
-                let _ = fs::write(path, toml);
-            }
-        }
-    }
+        let notifications_enabled: u32 = key.get_value("NotificationsEnabled").unwrap_or_default();
 
-    fn get_config_path() -> Option<PathBuf> {
-        dirs::config_dir().map(|mut path| {
-            path.push("headset-battery-indicator");
-            path.push("settings.toml");
-            path
+        log::debug!(
+            "NotificationsEnabled={}",
+            notifications_enabled
+        );
+
+        Ok(Self {
+            notifications_enabled: notifications_enabled != 0,
         })
+    }
+
+    pub fn save(&self) -> Result<()> {
+        let hkcu = winreg::RegKey::predef(HKEY_CURRENT_USER);
+        let (key, _) = hkcu
+            .create_subkey("Software\\HeadsetBatteryIndicator")
+            .context("accessing registry key")?;
+
+        key.set_value("NotificationsEnabled", &(self.notifications_enabled as u32))
+            .context("setting NotificationsEnabled value")?;
+
+        log::debug!(
+            "Set NotificationsEnabled={}",
+            self.notifications_enabled
+        );
+
+        Ok(())
     }
 }
