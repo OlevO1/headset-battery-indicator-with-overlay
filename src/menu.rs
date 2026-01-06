@@ -17,6 +17,7 @@ pub struct ContextMenu {
     menu_logs: MenuItem,
     menu_github: MenuItem,
     menu_close: MenuItem,
+    pub menu_trigger_notification: MenuItem,
 }
 
 impl ContextMenu {
@@ -38,7 +39,10 @@ impl ContextMenu {
         let menu_github = MenuItem::new(lang::t(view_updates), true, None);
         let menu_close = MenuItem::new(lang::t(quit_program), true, None);
         let separators = None;
+        let menu_trigger_notification = MenuItem::new("Trigger Test Notification", true, None);
 
+        #[cfg(debug_assertions)]
+        menu.append(&menu_trigger_notification)?;
         menu.append(&menu_notifications)?;
         menu.append_items(&[&menu_logs, &menu_github])?;
         menu.append(&PredefinedMenuItem::separator())?;
@@ -53,6 +57,7 @@ impl ContextMenu {
             menu_logs,
             menu_github,
             menu_close,
+            menu_trigger_notification,
         })
     }
 
