@@ -13,22 +13,33 @@ use crate::lang::Key::*;
 const DETACHED_PROCESS: u32 = 0x00000008;
 
 pub fn query_devices(vec: &mut Vec<Device>) -> anyhow::Result<()> {
+    let exe_dir = std::env::current_exe()
+        .context("getting current executable path")?
+        .parent()
+        .map(|p| p.to_path_buf())
+        .context("getting current executable directory")?;
+
     let res = process::Command::new("./headsetcontrol.exe")
+        .current_dir(exe_dir)
         .args(&["--battery", "--output", "json"])
         .stdout(Stdio::piped())
         .creation_flags(DETACHED_PROCESS)
         .output()
-        .context("Failed to execute headsetcontrol.exe")?;
+        .context("Failed to execute headsetcontrol.exe --battery --output json")?;
 
     let response: Output = match serde_json::from_slice(&res.stdout) {
         Ok(json) => json,
         Err(e) => {
-            log::debug!("./headsetcontrol.exe --battery --output json:\n{}", String::from_utf8_lossy(&res.stdout));
+            log::debug!(
+                "./headsetcontrol.exe --battery --output json:\n{}",
+                String::from_utf8_lossy(&res.stdout)
+            );
             return Err(anyhow::anyhow!(
                 "Failed to parse JSON from headsetcontrol.exe: {}",
                 e
             ));
-    }};
+        }
+    };
 
     vec.clear();
     for device in response.devices {

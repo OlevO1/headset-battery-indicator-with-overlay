@@ -46,33 +46,33 @@ impl Notifier {
         if let Some((last_level, last_status)) = self.last_notification_state {
             let mut msg = None;
 
+            let battery_discharging = current_status == BatteryState::BatteryAvailable;
+            let battery_charging = current_status == BatteryState::BatteryCharging;
             
             // Low battery (10%)
             if current_level <= 10
                 && last_level > 10
-                && current_status != BatteryState::BatteryCharging
-                && current_status != BatteryState::BatteryUnavailable
+                && battery_discharging
             {
                 msg = Some(format!("Battery low ({}%)", current_level));
             }
             // Critical battery (3%)
             else if current_level <= 3
                 && last_level > 3
-                && current_status != BatteryState::BatteryCharging
-                && current_status != BatteryState::BatteryUnavailable
+                && battery_discharging
             {
                 msg = Some(format!("Battery critical ({}%)", current_level));
             }
             // Charging started
-            else if current_status == BatteryState::BatteryCharging
+            else if battery_charging
                 && last_status != BatteryState::BatteryCharging
             {
-                msg = Some(format!("Charging started [{}%]", current_level));
+                msg = Some(format!("Charging started ({}%)", current_level));
             }
             // Battery full (100%)
             else if current_level == 100
                 && last_level < 100
-                && current_status == BatteryState::BatteryCharging
+                && battery_charging
             {
                 msg = Some("Battery full".to_string());
             }
@@ -122,7 +122,7 @@ impl Notifier {
     }
 
     pub fn send_test_notification(&mut self) {
-        self.show_notification(50, BatteryState::BatteryAvailable, "Test Device", "This is a test notification.".to_string());
+        self.show_notification(50, BatteryState::BatteryAvailable, "Test Device", "Battery critical (50%)".to_string());
     }
 }
 
@@ -243,74 +243,18 @@ pub fn toast_notif_logo_uri(battery_percent: isize, state: BatteryState) -> Opti
 }
 
 #[cfg(windows)]
-fn ensure_toast_shortcut(app_id: &str) -> anyhow::Result<()> {
+pub fn register_toast_app(app_id: &str) -> anyhow::Result<()> {
     // Win32 Toast notifications typically require a Start Menu shortcut whose
     // AppUserModelID matches the notifier ID. Without this, `show()` can succeed
     // but nothing appears.
 
-    use std::path::PathBuf;
-
-    use anyhow::Context;
-    let exe_path = std::env::current_exe().context("getting current exe path")?;
-
-    let appdata = std::env::var_os("APPDATA").context("APPDATA env var not set")?;
-    let mut shortcut_path = PathBuf::from(appdata);
-    shortcut_path.push("Microsoft\\Windows\\Start Menu\\Prograg");
-    shortcut_path.push("Headset Battery Indicator.lnk");
-
-    if shortcut_path.exists() {
-        return Ok(());
-    }
-
-    if let Some(parent) = shortcut_path.parent() {
-        std::fs::create_dir_all(parent).context("creating Start Menu Programs directory")?;
-    }
-
-    unsafe {
-        // Initialize COM (ignore mode mismatch if already initialized differently).
-        let _ = CoInitializeEx(None, COINIT_APARTMENTTHREADED);
-
-        let shell_link: IShellLinkW = CoCreateInstance(&ShellLink, None, CLSCTX_INPROC_SERVER)
-            .context("CoCreateInstance(ShellLink)")?;
-
-        let exe_w = to_wide_null_terminated(exe_path.as_os_str());
-        shell_link
-            .SetPath(PCWSTR::from_raw(exe_w.as_ptr()))
-            .context("IShellLinkW::SetPath")?;
-
-        // Set a stable AppUserModelID on the shortcut.
-        let property_store: IPropertyStore = shell_link
-            .cast()
-            .context("QueryInterface(IPropertyStore)")?;
-
-        let pv: PROPVARIANT = PROPVARIANT::from(app_id);
-        property_store
-            .SetValue(&PKEY_AppUserModel_ID, &pv)
-            .context("IPropertyStore::SetValue(PKEY_AppUserModel_ID)")?;
-        property_store.Commit().context("IPropertyStore::Commit")?;
-
-        let persist_file: IPersistFile =
-            shell_link.cast().context("QueryInterface(IPersistFile)")?;
-        let shortcut_w = to_wide_null_terminated(shortcut_path.as_os_str());
-        persist_file
-            .Save(PCWSTR::from_raw(shortcut_w.as_ptr()), true)
-            .context("IPersistFile::Save")?;
-    }
-
-    Ok(())
-}
-
-#[cfg(windows)]
-pub fn register_toast_app(app_id: &str) -> anyhow::Result<()> {
     // Ensure the system associates this running EXE with the same AUMID.
     unsafe {
         use anyhow::Context;
 
         SetCurrentProcessExplicitAppUserModelID(&HSTRING::from(app_id))
-            .context("SetCurrentProcessExplicitAppUserModelID")?;
+            .context("SetCurrentProcessExplicitAppUserModelID")
     }
-
-    ensure_toast_shortcut(app_id)
 }
 
 fn toast_cache_dir() -> Option<std::path::PathBuf> {

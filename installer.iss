@@ -8,7 +8,7 @@
 AppId=88ECD258-57B9-4DDB-ABA3-67DC0289A92C
 AppName={#MyAppDisplayName}
 ; keep this up to date
-AppVersion=3.2.0
+AppVersion=3.3.0
 WizardStyle=modern
 DefaultDirName={localappdata}\Programs\HeadsetBatteryIndicator
 DefaultGroupName={#MyAppDisplayName}
@@ -18,7 +18,7 @@ ArchitecturesInstallIn64BitMode=x64compatible
 ; to ask for a Start Menu folder name:
 DisableProgramGroupPage=yes
 UninstallDisplayIcon={app}\{#MyAppExeName}
-SetupIconFile=src/bat/main.ico
+SetupIconFile=src/icons/tray/main.ico
 Compression=lzma2
 SolidCompression=yes
 OutputBaseFilename="HeadsetBatteryIndicatorSetup"
@@ -37,6 +37,7 @@ Source: "licenses/HeadsetControl.txt"; DestDir: "{app}/licenses"; Flags: ignorev
 
 [Icons]
 Name: "{userstartup}\Headset Battery Indicator"; Filename: "{app}\headset-battery-indicator.exe";
+Name: "{autoprograms}\Headset Battery Indicator"; Filename: "{app}\headset-battery-indicator.exe";
 
 [Run]
 Filename: "{app}\headset-battery-indicator.exe"; WorkingDir: "{app}"; Description: "Launch application (it will show up inside the task bar ^-arrow menu)"; Flags: postinstall nowait
