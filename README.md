@@ -10,10 +10,12 @@ Adds a small icon to the "system tray" area of the Windows task bar, which displ
 * Built using Rust, with very low resource usage (<1MB RAM)
 * Supports most non-bluetooth headsets (SteelSeries, Logitech, Corsair, HyperX)
   * See all [supported headsets here](https://github.com/Sapd/HeadsetControl?tab=readme-ov-file#supported-headsets).
-    * Some headsets (notably Arctis Wireless 1) are may not work even though they are listed as supported.
+    * Some headsets (notably Arctis Wireless 1) may not work even though they are listed as supported.
 * Shows a little green dot to indicate charging
 
   ![Charging icon](docs/icon-charging.png)
+
+* Shows notifications on low battery level or when finished charging (optional)
 
 Headset Battery Indicator depends on [Sapd/HeadsetControl](https://github.com/Sapd/HeadsetControl), which is licensed under GPL v3.
 
@@ -23,11 +25,13 @@ Headset Battery Indicator depends on [Sapd/HeadsetControl](https://github.com/Sa
 
 > Running the installer may result in a Windows defender SmartScreen warning. This happens to all executables that don't have a large enough install count. There's no way around it other than paying hundreds of dollars every year for a signed certificate from Microsoft :(
 
+  Additionally, sometimes Windows Defender's ML-based antivirus falsely detects the program as a virus, most commonly Wacatac.b!ml (the "ml" at the end signifies machine learning).
+
 ## Security
 
 The code that is in this repository is the code that is in the executable. There is a [Github Action](https://github.com/aarol/headset-battery-indicator/actions) that builds the code from source and creates the release in the [releases page](https://github.com/aarol/headset-battery-indicator/releases).
 
-The GitHub release is marked as immutable, so once the executable is built by the Actions workflow, it cannot be modified by me or anyone else. This ways, you can be sure that the code you're running is the same code that is in this repository.
+The GitHub release is marked as immutable, so once the executable is built by the Actions workflow, it cannot be modified by me or anyone else. This way you can be sure that the code you're running is the same code that is in this repository.
 
 ## Troubleshooting
 
@@ -60,10 +64,11 @@ Finally, from the `headset-battery-indicator` folder, you can:
 ### Translations
 
 There are translations for the following languages:
-- English
-- Finnish
-- Italian
-- German
+
+* English
+* Finnish
+* Italian
+* German
 
 Translations can be added to the [lang.rs](./src/lang.rs) file.
 
