@@ -97,7 +97,7 @@ impl ContextMenu {
         for (i, device) in devices.iter().enumerate() {
             let is_selected = i == self.selected_device_idx;
             let menu_item = CheckMenuItem::new(device.product.clone(), true, is_selected, None);
-            self.menu.insert(&menu_item, 2 + i as usize)?; // Insert after version item
+            self.menu.insert(&menu_item, 2 + i)?; // Insert after version item
             self.device_menu_items.push((device.clone(), menu_item));
         }
 
@@ -130,10 +130,10 @@ impl ContextMenu {
                 }
             }
             id if id == self.menu_logs.id() => {
-                if let Ok(dir) = std::env::current_dir() {
-                    if let Err(e) = std::process::Command::new("explorer").arg(&dir).spawn() {
-                        error!("Failed to open path {dir:?}: {e:?}");
-                    }
+                if let Ok(dir) = std::env::current_dir()
+                    && let Err(e) = std::process::Command::new("explorer").arg(&dir).spawn()
+                {
+                    error!("Failed to open path {dir:?}: {e:?}");
                 }
             }
             id => {

@@ -4,11 +4,13 @@ mod menu;
 mod notify;
 mod settings;
 
+#[cfg(windows)]
+use anyhow::Result;
 use lang::Key::*;
 use std::time::{Duration, Instant};
 
 use anyhow::Context;
-use log::{error, info};
+use log::{debug, error, info, warn};
 use tray_icon::{TrayIcon, TrayIconBuilder, menu::MenuEvent};
 use winit::{
     application::ApplicationHandler,
@@ -58,9 +60,11 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 pub fn run() -> anyhow::Result<()> {
     info!("Starting application");
     info!("Version {VERSION}");
+    debug!("Using locale {:?}", *lang::LANG);
 
-    #[cfg(windows)]
-    enable_dark_mode_support();
+    if let Err(err) = enable_dark_mode_support() {
+        warn!("Failed to enable dark mode support: {:?}", err);
+    }
 
     let event_loop = EventLoop::new().context("Error initializing event loop")?;
 
@@ -216,7 +220,11 @@ impl ApplicationHandler<()> for AppState {
 
                 id if id == self.context_menu.menu_trigger_notification.id() => {
                     #[cfg(debug_assertions)]
-                    self.notifier.send_test_notification();
+                    {
+                        self.notifier
+                            .send_test_notification()
+                            .expect("Sending test notification");
+                    }
                 }
 
                 _ => self.context_menu.handle_event(event, event_loop),
@@ -253,7 +261,7 @@ enum PreferredAppMode {
 type SetPreferredAppModeFn = unsafe extern "system" fn(PreferredAppMode) -> i32;
 
 #[cfg(windows)]
-fn enable_dark_mode_support() {
+fn enable_dark_mode_support() -> Result<()> {
     unsafe {
         // Load uxtheme.dll
 
@@ -264,25 +272,18 @@ fn enable_dark_mode_support() {
             },
             core::PCSTR,
         };
-        let dll_name = b"uxtheme.dll\0";
-        let module: HMODULE = match LoadLibraryA(PCSTR::from_raw(dll_name.as_ptr())) {
-            Ok(m) => m,
-            Err(_) => {
-                log::warn!("Failed to load uxtheme.dll");
-                return;
-            }
-        };
+        let module: HMODULE =
+            LoadLibraryA(windows::core::s!("uxtheme.dll")).context("loading uxtheme.dll")?;
 
         // SetPreferredAppMode is ordinal 135 in uxtheme.dll
         let ordinal = 135u16;
-        let proc = GetProcAddress(module, PCSTR::from_raw(ordinal as *const u8));
+        let proc = GetProcAddress(module, PCSTR::from_raw(ordinal as *const u8))
+            .context("Failed to get proc address")?;
 
-        if let Some(proc) = proc {
-            let set_preferred_app_mode: SetPreferredAppModeFn = std::mem::transmute(proc);
-            set_preferred_app_mode(PreferredAppMode::AllowDark);
-        } else {
-            log::warn!("Failed to get SetPreferredAppMode function");
-        }
+        let set_preferred_app_mode: SetPreferredAppModeFn = std::mem::transmute(proc);
+        set_preferred_app_mode(PreferredAppMode::AllowDark);
+
+        Ok(())
     }
 }
 

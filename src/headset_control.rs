@@ -21,7 +21,7 @@ pub fn query_devices(vec: &mut Vec<Device>) -> anyhow::Result<()> {
 
     let res = process::Command::new("./headsetcontrol.exe")
         .current_dir(exe_dir)
-        .args(&["--battery", "--output", "json"])
+        .args(["--battery", "--output", "json"])
         .stdout(Stdio::piped())
         .creation_flags(DETACHED_PROCESS)
         .output()

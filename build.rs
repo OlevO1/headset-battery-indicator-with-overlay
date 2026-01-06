@@ -2,7 +2,7 @@ extern crate winres;
 
 fn main() {
     let mut res = winres::WindowsResource::new();
-    res.set_icon("src/icons/tray/main.ico");
+    res.set_icon("src/icons/main.ico");
 
     // Application manifest for dark mode support
     res.set_manifest(r#"
@@ -29,19 +29,19 @@ fn main() {
 
     // register light mode icons (10,20,...,50)
     for i in (10..=50).step_by(10) {
-        res.set_icon_with_id(&format!("src/icons/tray/battery{i}.ico"), &format!("{i}"));
+        res.set_icon_with_id(&format!("src/icons/battery{i}.ico"), &format!("{i}"));
         let charging_i = i + 1;
         res.set_icon_with_id(
-            &format!("src/icons/tray/battery{charging_i}.ico"),
+            &format!("src/icons/battery{charging_i}.ico"),
             &format!("{charging_i}"),
         );
     }
 
     for i in (15..=55).step_by(10) {
-        res.set_icon_with_id(&format!("src/icons/tray/battery{i}.ico"), &format!("{i}"));
+        res.set_icon_with_id(&format!("src/icons/battery{i}.ico"), &format!("{i}"));
         let charging_i = i + 1;
         res.set_icon_with_id(
-            &format!("src/icons/tray/battery{charging_i}.ico"),
+            &format!("src/icons/battery{charging_i}.ico"),
             &format!("{charging_i}"),
         );
     }

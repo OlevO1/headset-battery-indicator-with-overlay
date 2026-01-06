@@ -18,7 +18,7 @@ ArchitecturesInstallIn64BitMode=x64compatible
 ; to ask for a Start Menu folder name:
 DisableProgramGroupPage=yes
 UninstallDisplayIcon={app}\{#MyAppExeName}
-SetupIconFile=src/icons/tray/main.ico
+SetupIconFile=src/icons/main.ico
 Compression=lzma2
 SolidCompression=yes
 OutputBaseFilename="HeadsetBatteryIndicatorSetup"
